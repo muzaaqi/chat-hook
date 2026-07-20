@@ -156,4 +156,62 @@ public class ChatHookPlugin extends JavaPlugin {
     public Set<String> getResolvedWhitelist() {
         return resolvedWhitelist;
     }
+
+    public void runDiagnostics(org.bukkit.command.CommandSender sender) {
+        sender.sendMessage("§e[ChatHook Diagnostics] §7Running checks asynchronously...");
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            sender.sendMessage("§8========================================");
+            
+            // 1. Check Webhook Connection
+            String url = getConfig().getString("webhook-url");
+            if (url == null || url.isEmpty()) {
+                sender.sendMessage("§c✖ Webhook URL: Not configured.");
+            } else {
+                try {
+                    HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
+                    HttpRequest request = HttpRequest.newBuilder()
+                            .uri(URI.create(url))
+                            .method("HEAD", HttpRequest.BodyPublishers.noBody())
+                            .build();
+
+                    HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+                    sender.sendMessage("§a✔ Webhook URL: Reachable (Status: " + response.statusCode() + ")");
+                } catch (Exception e) {
+                    sender.sendMessage("§c✖ Webhook URL: Unreachable (" + e.getMessage() + ")");
+                }
+            }
+            
+            // 2. Check Whitelist
+            List<String> configWhitelist = getConfig().getStringList("ip-whitelist");
+            if (configWhitelist.isEmpty()) {
+                sender.sendMessage("§c✖ IP Whitelist: Empty (No incoming connections allowed)");
+            } else {
+                sender.sendMessage("§7IP Whitelist:");
+                for (String entry : configWhitelist) {
+                    if (entry.equals("0.0.0.0")) {
+                        sender.sendMessage("  §a✔ " + entry + " (All IPs allowed)");
+                        continue;
+                    }
+                    
+                    String cleanEntry = entry;
+                    if (cleanEntry.startsWith("http://")) cleanEntry = cleanEntry.substring(7);
+                    else if (cleanEntry.startsWith("https://")) cleanEntry = cleanEntry.substring(8);
+                    int slashIndex = cleanEntry.indexOf('/');
+                    if (slashIndex != -1) cleanEntry = cleanEntry.substring(0, slashIndex);
+                    
+                    try {
+                        InetAddress[] addresses = InetAddress.getAllByName(cleanEntry);
+                        java.util.List<String> ips = new java.util.ArrayList<>();
+                        for (InetAddress addr : addresses) {
+                            ips.add(addr.getHostAddress());
+                        }
+                        sender.sendMessage("  §a✔ " + entry + " -> " + String.join(", ", ips));
+                    } catch (UnknownHostException e) {
+                        sender.sendMessage("  §c✖ " + entry + " (Failed to resolve)");
+                    }
+                }
+            }
+            sender.sendMessage("§8========================================");
+        });
+    }
 }

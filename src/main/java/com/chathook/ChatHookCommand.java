@@ -34,12 +34,17 @@ public class ChatHookCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage("§f/chathook setport <port> §7- Set web server port");
             sender.sendMessage("§f/chathook addip <ip> §7- Add IP to whitelist");
             sender.sendMessage("§f/chathook removeip <ip> §7- Remove IP from whitelist");
+            sender.sendMessage("§f/chathook check §7- Run diagnostics and connection checks");
             return true;
         }
 
         String subCommand = args[0].toLowerCase();
         
         switch (subCommand) {
+            case "check":
+                plugin.runDiagnostics(sender);
+                break;
+
             case "reload":
                 plugin.reloadConfig();
                 plugin.updateResolvedWhitelist();
@@ -139,7 +144,7 @@ public class ChatHookCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            List<String> commands = Arrays.asList("reload", "send", "receive", "seturl", "setport", "addip", "removeip");
+            List<String> commands = Arrays.asList("reload", "send", "receive", "seturl", "setport", "addip", "removeip", "check");
             return commands.stream().filter(s -> s.startsWith(args[0].toLowerCase())).collect(Collectors.toList());
         }
         
