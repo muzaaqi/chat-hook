@@ -5,8 +5,10 @@ A Minecraft Paper plugin that bridges your Minecraft server chat with a website 
 ## Features
 - **Real-time Webhooks**: Sends all in-game chats instantly to your web backend as JSON.
 - **REST API Receiver**: A built-in lightweight web server receives chat messages from your website and broadcasts them in-game.
-- **Security**: Protect endpoints using an IP Whitelist and a Bearer Authorization Secret Key.
+- **Security First**: Protect endpoints using an IP Whitelist. On first run, it auto-generates a secure 64-character Bearer Authorization Secret Key if one isn't set.
 - **Plugin Integrations**: Automatically captures permission groups (via LuckPerms or PlaceholderAPI), handles muted players natively (EssentialsX compatibility), and ensures web-chat users are registered (AuthMe check).
+- **Startup Diagnostics**: Beautiful ASCII log that asynchronously tests your webhook connection on startup to catch offline backends early.
+- **Dynamic In-game Management**: Use `/chathook` commands to modify URLs, ports, and whitelists on-the-fly without needing to touch files or restart the server!
 
 ---
 
@@ -46,6 +48,7 @@ web-server:
   port: 8081
   
 # Secret key to authenticate requests between server and website
+# If left as default or empty, a secure key will be automatically generated on startup!
 secret-key: "YOUR_SECRET_KEY"
 
 # IP whitelist for incoming webhooks from website
@@ -53,7 +56,21 @@ ip-whitelist:
   - "127.0.0.1"
   - "0.0.0.0"
 ```
-After editing, restart your Minecraft server for the changes to take effect.
+After editing, you can restart your Minecraft server or simply type `/chathook reload` in-game for the changes to take effect.
+
+---
+
+## Commands & Permissions
+
+Permission required for all commands: `chathook.admin` (Default: OP)
+
+- `/chathook reload` - Reloads `config.yml` from disk and gracefully restarts the web server if needed.
+- `/chathook send <on|off>` - Temporarily toggles sending chat webhooks to your website.
+- `/chathook receive <on|off>` - Temporarily toggles receiving incoming chat requests from your website.
+- `/chathook seturl <url>` - Updates the webhook URL on the fly and saves it.
+- `/chathook setport <port>` - Updates the web server port, saves it, and instantly restarts the listener.
+- `/chathook addip <ip>` - Dynamically adds an IP to the `ip-whitelist`.
+- `/chathook removeip <ip>` - Dynamically removes an IP from the `ip-whitelist`.
 
 ---
 
