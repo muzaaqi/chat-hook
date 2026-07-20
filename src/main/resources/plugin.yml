@@ -1,0 +1,7 @@
+name: ChatHook
+version: 1.0.0
+main: com.chathook.ChatHookPlugin
+description: Bridges Minecraft chat with a website in real-time
+author: Agent
+api-version: '1.21'
+softdepend: [AuthMe, LuckPerms, PlaceholderAPI, Essentials]
