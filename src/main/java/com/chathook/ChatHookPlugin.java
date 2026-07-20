@@ -127,14 +127,26 @@ public class ChatHookPlugin extends JavaPlugin {
                     newWhitelist.add(entry);
                     continue;
                 }
+                
+                String cleanEntry = entry;
+                if (cleanEntry.startsWith("http://")) {
+                    cleanEntry = cleanEntry.substring(7);
+                } else if (cleanEntry.startsWith("https://")) {
+                    cleanEntry = cleanEntry.substring(8);
+                }
+                int slashIndex = cleanEntry.indexOf('/');
+                if (slashIndex != -1) {
+                    cleanEntry = cleanEntry.substring(0, slashIndex);
+                }
+                
                 try {
-                    InetAddress[] addresses = InetAddress.getAllByName(entry);
+                    InetAddress[] addresses = InetAddress.getAllByName(cleanEntry);
                     for (InetAddress addr : addresses) {
                         newWhitelist.add(addr.getHostAddress());
                     }
                 } catch (UnknownHostException e) {
-                    getLogger().warning("Could not resolve IP for whitelist entry: " + entry);
-                    newWhitelist.add(entry); // Add it anyway as a raw string
+                    getLogger().warning("Could not resolve IP for whitelist entry: " + cleanEntry + " (Original: " + entry + ")");
+                    newWhitelist.add(cleanEntry); // Add it anyway as a raw string
                 }
             }
             this.resolvedWhitelist = newWhitelist;
