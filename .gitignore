@@ -1,1 +1,7 @@
 .agents
+.gradle/
+build/
+*.jar
+.idea/
+*.iml
+*.class

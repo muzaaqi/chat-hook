@@ -3,20 +3,25 @@ package com.chathook;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.net.InetAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 public class ChatHookPlugin extends JavaPlugin {
     
-    private WebServer webServer;
-    private WebhookSender webhookSender;
-    
     private boolean sendEnabled = true;
     private boolean receiveEnabled = true;
+    private WebServer webServer;
+    private WebhookSender webhookSender;
+    private Set<String> resolvedWhitelist = new HashSet<>();
     
     @Override
     public void onEnable() {
@@ -52,6 +57,7 @@ public class ChatHookPlugin extends JavaPlugin {
         
         startWebServer();
         checkWebhookStatus();
+        updateResolvedWhitelist();
         
         logger.info("§aChatHook has been successfully enabled!");
     }
@@ -109,5 +115,33 @@ public class ChatHookPlugin extends JavaPlugin {
                 getLogger().warning("§cPlease check your config.yml and ensure your backend server is running.");
             }
         });
+    }
+    
+    public void updateResolvedWhitelist() {
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            Set<String> newWhitelist = new HashSet<>();
+            List<String> configWhitelist = getConfig().getStringList("ip-whitelist");
+            
+            for (String entry : configWhitelist) {
+                if (entry.equals("0.0.0.0")) {
+                    newWhitelist.add(entry);
+                    continue;
+                }
+                try {
+                    InetAddress[] addresses = InetAddress.getAllByName(entry);
+                    for (InetAddress addr : addresses) {
+                        newWhitelist.add(addr.getHostAddress());
+                    }
+                } catch (UnknownHostException e) {
+                    getLogger().warning("Could not resolve IP for whitelist entry: " + entry);
+                    newWhitelist.add(entry); // Add it anyway as a raw string
+                }
+            }
+            this.resolvedWhitelist = newWhitelist;
+        });
+    }
+    
+    public Set<String> getResolvedWhitelist() {
+        return resolvedWhitelist;
     }
 }

@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 
 public class WebServer {
@@ -62,10 +63,10 @@ public class WebServer {
 
             // Check IP Whitelist
             String remoteIp = exchange.getRemoteAddress().getAddress().getHostAddress();
-            List<String> whitelist = plugin.getConfig().getStringList("ip-whitelist");
-            if (!whitelist.isEmpty() && !whitelist.contains(remoteIp) && !whitelist.contains("0.0.0.0")) {
-                plugin.getLogger().warning("Blocked request from non-whitelisted IP: " + remoteIp);
-                sendResponse(exchange, 403, "Forbidden IP");
+            Set<String> whitelist = plugin.getResolvedWhitelist();
+            if (!whitelist.contains(remoteIp) && !whitelist.contains("0.0.0.0")) {
+                plugin.getLogger().warning("Blocked unauthorized web chat request from IP: " + remoteIp);
+                sendResponse(exchange, 403, "Forbidden: IP not whitelisted");
                 return;
             }
 

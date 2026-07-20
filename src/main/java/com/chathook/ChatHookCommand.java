@@ -42,6 +42,7 @@ public class ChatHookCommand implements CommandExecutor, TabCompleter {
         switch (subCommand) {
             case "reload":
                 plugin.reloadConfig();
+                plugin.updateResolvedWhitelist();
                 plugin.restartWebServer();
                 sender.sendMessage("§aChatHook configuration reloaded!");
                 break;
@@ -104,9 +105,10 @@ public class ChatHookCommand implements CommandExecutor, TabCompleter {
                     ips.add(ipToAdd);
                     plugin.getConfig().set("ip-whitelist", ips);
                     plugin.saveConfig();
-                    sender.sendMessage("§aIP §f" + ipToAdd + " §aadded to whitelist.");
+                    plugin.updateResolvedWhitelist();
+                    sender.sendMessage("§aIP/Domain §f" + ipToAdd + " §aadded to whitelist.");
                 } else {
-                    sender.sendMessage("§cIP is already in the whitelist.");
+                    sender.sendMessage("§cIP/Domain is already in the whitelist.");
                 }
                 break;
                 
@@ -120,9 +122,10 @@ public class ChatHookCommand implements CommandExecutor, TabCompleter {
                 if (listToRemoveFrom.remove(ipToRemove)) {
                     plugin.getConfig().set("ip-whitelist", listToRemoveFrom);
                     plugin.saveConfig();
-                    sender.sendMessage("§aIP §f" + ipToRemove + " §aremoved from whitelist.");
+                    plugin.updateResolvedWhitelist();
+                    sender.sendMessage("§aIP/Domain §f" + ipToRemove + " §aremoved from whitelist.");
                 } else {
-                    sender.sendMessage("§cIP not found in whitelist.");
+                    sender.sendMessage("§cIP/Domain not found in whitelist.");
                 }
                 break;
                 
