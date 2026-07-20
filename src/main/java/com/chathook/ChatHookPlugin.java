@@ -8,6 +8,9 @@ public class ChatHookPlugin extends JavaPlugin {
     private WebServer webServer;
     private WebhookSender webhookSender;
     
+    private boolean sendEnabled = true;
+    private boolean receiveEnabled = true;
+    
     @Override
     public void onEnable() {
         saveDefaultConfig();
@@ -25,18 +28,42 @@ public class ChatHookPlugin extends JavaPlugin {
         webhookSender = new WebhookSender(this);
         getServer().getPluginManager().registerEvents(new ChatListener(this, webhookSender), this);
         
-        int port = getConfig().getInt("web-server.port", 8081);
-        webServer = new WebServer(this, port);
-        webServer.start();
+        ChatHookCommand cmd = new ChatHookCommand(this);
+        getCommand("chathook").setExecutor(cmd);
+        getCommand("chathook").setTabCompleter(cmd);
+        
+        startWebServer();
         
         logger.info("ChatHook has been enabled!");
     }
     
     @Override
     public void onDisable() {
-        if (webServer != null) {
-            webServer.stop();
-        }
+        stopWebServer();
         getLogger().info("ChatHook has been disabled!");
     }
+    
+    private void startWebServer() {
+        int port = getConfig().getInt("web-server.port", 8081);
+        webServer = new WebServer(this, port);
+        webServer.start();
+    }
+    
+    private void stopWebServer() {
+        if (webServer != null) {
+            webServer.stop();
+            webServer = null;
+        }
+    }
+    
+    public void restartWebServer() {
+        stopWebServer();
+        startWebServer();
+    }
+    
+    public boolean isSendEnabled() { return sendEnabled; }
+    public void setSendEnabled(boolean enabled) { this.sendEnabled = enabled; }
+    
+    public boolean isReceiveEnabled() { return receiveEnabled; }
+    public void setReceiveEnabled(boolean enabled) { this.receiveEnabled = enabled; }
 }

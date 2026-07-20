@@ -5,3 +5,14 @@ description: Bridges Minecraft chat with a website in real-time
 author: Agent
 api-version: '1.21'
 softdepend: [AuthMe, LuckPerms, PlaceholderAPI, Essentials]
+
+commands:
+  chathook:
+    description: "Manage ChatHook settings"
+    usage: "/chathook <reload|send|receive|url|port|ip>"
+    permission: chathook.admin
+
+permissions:
+  chathook.admin:
+    description: "Allows access to ChatHook commands"
+    default: op

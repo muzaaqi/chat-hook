@@ -55,6 +55,11 @@ public class WebServer {
                 return;
             }
 
+            if (!plugin.isReceiveEnabled()) {
+                sendResponse(exchange, 503, "Service Unavailable: Chat receiving is disabled");
+                return;
+            }
+
             // Check IP Whitelist
             String remoteIp = exchange.getRemoteAddress().getAddress().getHostAddress();
             List<String> whitelist = plugin.getConfig().getStringList("ip-whitelist");

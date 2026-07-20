@@ -24,6 +24,10 @@ public class WebhookSender {
     }
 
     public void sendChat(UUID uuid, String name, String group, String message) {
+        if (!plugin.isSendEnabled()) {
+            return;
+        }
+
         String url = plugin.getConfig().getString("webhook-url");
         String secret = plugin.getConfig().getString("secret-key");
         
