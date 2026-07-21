@@ -1,3 +1,6 @@
+# Configuration version (Do not change)
+config-version: 2
+
 # Webhook URL to send Minecraft chat to
 webhook-url: "http://localhost:8080/api/minecraft-chat"
 
@@ -6,9 +9,11 @@ web-server:
   port: 8081
   
 # Secret key to authenticate requests between server and website
+enable-secret-key: true
 secret-key: "YOUR_SECRET_KEY"
 
 # IP whitelist for incoming webhooks from website
+enable-ip-whitelist: false
 ip-whitelist:
   - "127.0.0.1"
   - "0.0.0.0"

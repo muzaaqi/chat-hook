@@ -26,6 +26,7 @@ public class ChatHookPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        migrateConfig();
         Logger logger = getLogger();
         
         logger.info(" ");
@@ -78,6 +79,23 @@ public class ChatHookPlugin extends JavaPlugin {
         if (webServer != null) {
             webServer.stop();
             webServer = null;
+        }
+    }
+    
+    private void migrateConfig() {
+        int version = getConfig().getInt("config-version", 1);
+        if (version < 2) {
+            getLogger().info("Migrating old config to version 2...");
+            getConfig().set("config-version", 2);
+            
+            if (!getConfig().contains("enable-secret-key")) {
+                getConfig().set("enable-secret-key", true);
+            }
+            if (!getConfig().contains("enable-ip-whitelist")) {
+                getConfig().set("enable-ip-whitelist", false);
+            }
+            
+            saveConfig();
         }
     }
     
@@ -182,35 +200,49 @@ public class ChatHookPlugin extends JavaPlugin {
             }
             
             // 2. Check Whitelist
-            List<String> configWhitelist = getConfig().getStringList("ip-whitelist");
-            if (configWhitelist.isEmpty()) {
-                sender.sendMessage("§c✖ IP Whitelist: Empty (No incoming connections allowed)");
+            boolean enableWhitelist = getConfig().getBoolean("enable-ip-whitelist", false);
+            if (!enableWhitelist) {
+                sender.sendMessage("§e⚠ IP Whitelist: Disabled (All incoming connections allowed)");
             } else {
-                sender.sendMessage("§7IP Whitelist:");
-                for (String entry : configWhitelist) {
-                    if (entry.equals("0.0.0.0")) {
-                        sender.sendMessage("  §a✔ " + entry + " (All IPs allowed)");
-                        continue;
-                    }
-                    
-                    String cleanEntry = entry;
-                    if (cleanEntry.startsWith("http://")) cleanEntry = cleanEntry.substring(7);
-                    else if (cleanEntry.startsWith("https://")) cleanEntry = cleanEntry.substring(8);
-                    int slashIndex = cleanEntry.indexOf('/');
-                    if (slashIndex != -1) cleanEntry = cleanEntry.substring(0, slashIndex);
-                    
-                    try {
-                        InetAddress[] addresses = InetAddress.getAllByName(cleanEntry);
-                        java.util.List<String> ips = new java.util.ArrayList<>();
-                        for (InetAddress addr : addresses) {
-                            ips.add(addr.getHostAddress());
+                List<String> configWhitelist = getConfig().getStringList("ip-whitelist");
+                if (configWhitelist.isEmpty()) {
+                    sender.sendMessage("§c✖ IP Whitelist: Empty (No incoming connections allowed)");
+                } else {
+                    sender.sendMessage("§7IP Whitelist:");
+                    for (String entry : configWhitelist) {
+                        if (entry.equals("0.0.0.0")) {
+                            sender.sendMessage("  §a✔ " + entry + " (All IPs allowed)");
+                            continue;
                         }
-                        sender.sendMessage("  §a✔ " + entry + " -> " + String.join(", ", ips));
-                    } catch (UnknownHostException e) {
-                        sender.sendMessage("  §c✖ " + entry + " (Failed to resolve)");
+                        
+                        String cleanEntry = entry;
+                        if (cleanEntry.startsWith("http://")) cleanEntry = cleanEntry.substring(7);
+                        else if (cleanEntry.startsWith("https://")) cleanEntry = cleanEntry.substring(8);
+                        int slashIndex = cleanEntry.indexOf('/');
+                        if (slashIndex != -1) cleanEntry = cleanEntry.substring(0, slashIndex);
+                        
+                        try {
+                            InetAddress[] addresses = InetAddress.getAllByName(cleanEntry);
+                            java.util.List<String> ips = new java.util.ArrayList<>();
+                            for (InetAddress addr : addresses) {
+                                ips.add(addr.getHostAddress());
+                            }
+                            sender.sendMessage("  §a✔ " + entry + " -> " + String.join(", ", ips));
+                        } catch (UnknownHostException e) {
+                            sender.sendMessage("  §c✖ " + entry + " (Failed to resolve)");
+                        }
                     }
                 }
             }
+            
+            // 3. Check Secret Key
+            boolean enableSecret = getConfig().getBoolean("enable-secret-key", true);
+            if (!enableSecret) {
+                sender.sendMessage("§e⚠ Secret Key: Disabled (Unsafe for production)");
+            } else {
+                sender.sendMessage("§a✔ Secret Key: Enabled");
+            }
+            
             sender.sendMessage("§8========================================");
         });
     }

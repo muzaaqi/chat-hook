@@ -63,21 +63,27 @@ public class WebServer {
 
             // Check IP Whitelist
             String remoteIp = exchange.getRemoteAddress().getAddress().getHostAddress();
-            Set<String> whitelist = plugin.getResolvedWhitelist();
-            if (!whitelist.contains(remoteIp) && !whitelist.contains("0.0.0.0")) {
-                plugin.getLogger().warning("Blocked unauthorized web chat request from IP: " + remoteIp);
-                sendResponse(exchange, 403, "Forbidden: IP not whitelisted");
-                return;
+            boolean enableWhitelist = plugin.getConfig().getBoolean("enable-ip-whitelist", false);
+            if (enableWhitelist) {
+                Set<String> whitelist = plugin.getResolvedWhitelist();
+                if (!whitelist.contains(remoteIp) && !whitelist.contains("0.0.0.0")) {
+                    plugin.getLogger().warning("Blocked unauthorized web chat request from IP: " + remoteIp);
+                    sendResponse(exchange, 403, "Forbidden: IP not whitelisted");
+                    return;
+                }
             }
 
             // Check Secret Key
-            String secretHeader = exchange.getRequestHeaders().getFirst("Authorization");
-            String configSecret = plugin.getConfig().getString("secret-key");
-            if (configSecret != null && !configSecret.isEmpty()) {
-                if (secretHeader == null || !secretHeader.equals("Bearer " + configSecret)) {
-                    plugin.getLogger().warning("Blocked request with invalid secret from IP: " + remoteIp);
-                    sendResponse(exchange, 401, "Unauthorized");
-                    return;
+            boolean enableSecret = plugin.getConfig().getBoolean("enable-secret-key", true);
+            if (enableSecret) {
+                String secretHeader = exchange.getRequestHeaders().getFirst("Authorization");
+                String configSecret = plugin.getConfig().getString("secret-key");
+                if (configSecret != null && !configSecret.isEmpty()) {
+                    if (secretHeader == null || !secretHeader.equals("Bearer " + configSecret)) {
+                        plugin.getLogger().warning("Blocked request with invalid secret from IP: " + remoteIp);
+                        sendResponse(exchange, 401, "Unauthorized");
+                        return;
+                    }
                 }
             }
 

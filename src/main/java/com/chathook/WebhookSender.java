@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -30,6 +31,7 @@ public class WebhookSender {
 
         String url = plugin.getConfig().getString("webhook-url");
         String secret = plugin.getConfig().getString("secret-key");
+        boolean enableSecret = plugin.getConfig().getBoolean("enable-secret-key", true);
         
         if (url == null || url.isEmpty()) {
             return;
@@ -43,20 +45,24 @@ public class WebhookSender {
                 json.addProperty("group", group);
                 json.addProperty("message", message);
                 
-                HttpRequest request = HttpRequest.newBuilder()
+                HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                         .uri(URI.create(url))
                         .header("Content-Type", "application/json")
-                        .header("Authorization", "Bearer " + secret)
-                        .POST(HttpRequest.BodyPublishers.ofString(json.toString()))
-                        .build();
+                        .POST(HttpRequest.BodyPublishers.ofString(json.toString(), StandardCharsets.UTF_8));
+                        
+                if (enableSecret && secret != null && !secret.isEmpty()) {
+                    requestBuilder.header("Authorization", "Bearer " + secret);
+                }
+                
+                HttpRequest request = requestBuilder.build();
                         
                 HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
                 
                 if (response.statusCode() >= 400) {
-                    plugin.getLogger().warning("Failed to send webhook. Status code: " + response.statusCode() + ", body: " + response.body());
+                    plugin.getLogger().warning("Failed to send chat webhook: HTTP " + response.statusCode());
                 }
             } catch (Exception e) {
-                plugin.getLogger().log(Level.WARNING, "Error sending webhook", e);
+                plugin.getLogger().warning("Error sending chat webhook: " + e.getMessage());
             }
         });
     }
