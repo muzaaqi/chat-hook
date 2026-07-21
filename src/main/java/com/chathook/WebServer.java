@@ -98,6 +98,7 @@ public class WebServer {
                 String uuidStr = json.get("uuid").getAsString();
                 String username = json.get("username").getAsString();
                 String message = json.get("message").getAsString();
+                String displayName = json.has("realname") ? json.get("realname").getAsString() : username;
 
                 // Check if the user is registered in AuthMe (optional check since we don't need password)
                 if (Bukkit.getPluginManager().getPlugin("AuthMe") != null) {
@@ -109,8 +110,9 @@ public class WebServer {
 
                 // Broadcast message to Minecraft chat
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    Component chatMessage = Component.text("[Web] ", NamedTextColor.AQUA)
-                            .append(Component.text(username + ": ", NamedTextColor.WHITE))
+                    Component chatMessage = Component.text("[WEB] ", NamedTextColor.AQUA)
+                            .append(Component.text(displayName, NamedTextColor.WHITE))
+                            .append(Component.text(" » ", NamedTextColor.LIGHT_PURPLE))
                             .append(Component.text(message, NamedTextColor.GRAY));
                             
                     Bukkit.broadcast(chatMessage);
