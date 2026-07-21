@@ -86,14 +86,11 @@ public class ChatHookPlugin extends JavaPlugin {
         int version = getConfig().getInt("config-version", 1);
         if (version < 2) {
             getLogger().info("Migrating old config to version 2...");
-            getConfig().set("config-version", 2);
             
-            if (!getConfig().contains("enable-secret-key")) {
-                getConfig().set("enable-secret-key", true);
-            }
-            if (!getConfig().contains("enable-ip-whitelist")) {
-                getConfig().set("enable-ip-whitelist", false);
-            }
+            // Merge defaults from the jar (preserves comments in modern Spigot) 
+            // while keeping all existing user values!
+            getConfig().options().copyDefaults(true);
+            getConfig().set("config-version", 2);
             
             saveConfig();
         }
