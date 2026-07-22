@@ -11,6 +11,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class ChatListener implements Listener {
 
@@ -34,6 +36,20 @@ public class ChatListener implements Listener {
         String group = getPlayerGroup(player);
         
         webhookSender.sendChat(player.getUniqueId(), player.getName(), group, message);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        String group = getPlayerGroup(player);
+        webhookSender.sendEvent("join", player.getUniqueId(), player.getName(), group);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        String group = getPlayerGroup(player);
+        webhookSender.sendEvent("leave", player.getUniqueId(), player.getName(), group);
     }
 
     private String getPlayerGroup(Player player) {
