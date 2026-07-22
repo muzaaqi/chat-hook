@@ -122,16 +122,28 @@ When a player chats in-game, the plugin will instantly send a `POST` request to 
 - `Content-Type: application/json`
 - `Authorization: Bearer YOUR_SECRET_KEY` *(if `enable-secret-key` is true)*
 
-**Example Webhook Payload You Will Receive:**
+**Example 'chat' Payload:**
 ```json
 {
+  "type": "chat",
   "uuid": "5b22b7a8-6f65-4f45-9a84-075e7a93c786",
   "name": "Notch",
   "group": "admin",
   "message": "Hello everyone on the website!"
 }
 ```
-*Note: The `group` is retrieved automatically via LuckPerms. If LuckPerms isn't found, it falls back to `%vault_rank%` via PlaceholderAPI.*
+
+**Example 'join' / 'leave' Payload:**
+```json
+{
+  "type": "join",
+  "uuid": "5b22b7a8-6f65-4f45-9a84-075e7a93c786",
+  "name": "Notch",
+  "group": "admin"
+}
+```
+
+*Note: The `type` field indicates the event (`chat`, `join`, or `leave`). For `join` and `leave` events, the `message` field is intentionally omitted. The `group` is retrieved automatically via LuckPerms. If LuckPerms isn't found, it falls back to `%vault_rank%` via PlaceholderAPI.*
 
 ### 3. Diagnostic Webhook Handling (HEAD Requests)
 When the plugin runs `/chathook check` or starts up, it sends a `HEAD` request to your `webhook-url` to verify connectivity. 
