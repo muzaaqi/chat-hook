@@ -36,7 +36,7 @@ gradlew build
 The compiled JAR file will be located in the `build/libs/` directory.
 
 ### 2. Installation
-1. Move the compiled `ChatHook-1.0.0.jar` into your Minecraft server's `plugins/` folder.
+1. Move the compiled `ChatHook-1.1.0.jar` into your Minecraft server's `plugins/` folder.
 2. Start the server. The plugin will generate a default configuration folder.
 
 ### 3. Configuration
