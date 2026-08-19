@@ -100,8 +100,11 @@ public class WebServer {
                 String message = json.get("message").getAsString();
                 String displayName = json.has("realname") ? json.get("realname").getAsString() : username;
 
-                // Check if the user is registered in AuthMe (optional check since we don't need password)
-                if (Bukkit.getPluginManager().getPlugin("AuthMe") != null) {
+                boolean isDiscord = (json.has("source") && "discord".equalsIgnoreCase(json.get("source").getAsString()))
+                        || username.startsWith("[Discord]");
+
+                // Check if the user is registered in AuthMe (only if not Discord and AuthMe is installed)
+                if (!isDiscord && Bukkit.getPluginManager().getPlugin("AuthMe") != null) {
                     if (!AuthMeApi.getInstance().isRegistered(username)) {
                         sendResponse(exchange, 403, "User is not registered in AuthMe");
                         return;
@@ -110,7 +113,11 @@ public class WebServer {
 
                 // Broadcast message to Minecraft chat
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    Component chatMessage = Component.text("[WEB] ", NamedTextColor.AQUA)
+                    Component prefix = isDiscord
+                            ? Component.text("[Discord] ", NamedTextColor.BLUE)
+                            : Component.text("[WEB] ", NamedTextColor.AQUA);
+
+                    Component chatMessage = prefix
                             .append(Component.text(displayName, NamedTextColor.WHITE))
                             .append(Component.text(" » ", NamedTextColor.LIGHT_PURPLE))
                             .append(Component.text(message, NamedTextColor.GRAY));
