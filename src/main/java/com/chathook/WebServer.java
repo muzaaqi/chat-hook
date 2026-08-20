@@ -98,14 +98,17 @@ public class WebServer {
                 String uuidStr = json.get("uuid").getAsString();
                 String username = json.get("username").getAsString();
                 String message = json.get("message").getAsString();
-                String displayName = json.has("realname") ? json.get("realname").getAsString() : username;
+                String source = json.has("source") ? json.get("source").getAsString().toLowerCase() : "web";
+                String sourceTag = plugin.getConfig().getString("source_tags." + source, source.toUpperCase());
+                String group = json.has("group") ? json.get("group").getAsString().toUpperCase() : "MEMBER";
+                String displayName = json.has("realname") && !json.get("realname").isJsonNull() && !json.get("realname").getAsString().isEmpty()
+                        ? json.get("realname").getAsString()
+                        : username;
 
-                boolean isDiscord = (json.has("source") && "discord".equalsIgnoreCase(json.get("source").getAsString()))
-                        || username.startsWith("[Discord]")
-                        || message.startsWith("[DISCORD]");
+                boolean isDiscord = "discord".equalsIgnoreCase(source);
 
-                // Check if the user is registered in AuthMe (only if not Discord and AuthMe is installed)
-                if (!isDiscord && Bukkit.getPluginManager().getPlugin("AuthMe") != null) {
+                // Check if the user is registered in AuthMe (only if from web and AuthMe is installed)
+                if ("web".equalsIgnoreCase(source) && Bukkit.getPluginManager().getPlugin("AuthMe") != null) {
                     if (!AuthMeApi.getInstance().isRegistered(username)) {
                         sendResponse(exchange, 403, "User is not registered in AuthMe");
                         return;
@@ -114,20 +117,19 @@ public class WebServer {
 
                 // Broadcast message to Minecraft chat
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    if (isDiscord && message.startsWith("[DISCORD]")) {
-                        Bukkit.broadcast(Component.text(message, NamedTextColor.WHITE));
-                    } else {
-                        Component prefix = isDiscord
-                                ? Component.text("[DISCORD] ", NamedTextColor.BLUE)
-                                : Component.text("[WEB] ", NamedTextColor.AQUA);
+                    NamedTextColor prefixColor = isDiscord
+                            ? NamedTextColor.BLUE
+                            : "web".equalsIgnoreCase(source)
+                            ? NamedTextColor.AQUA
+                            : NamedTextColor.GREEN;
 
-                        Component chatMessage = prefix
-                                .append(Component.text(displayName, NamedTextColor.WHITE))
-                                .append(Component.text(" » ", NamedTextColor.LIGHT_PURPLE))
-                                .append(Component.text(message, NamedTextColor.GRAY));
-                                
-                        Bukkit.broadcast(chatMessage);
-                    }
+                    Component chatMessage = Component.text("[" + sourceTag + "] ", prefixColor)
+                            .append(Component.text("[" + group + "] - ", NamedTextColor.GRAY))
+                            .append(Component.text(displayName, NamedTextColor.WHITE))
+                            .append(Component.text(" » ", NamedTextColor.LIGHT_PURPLE))
+                            .append(Component.text(message, NamedTextColor.GRAY));
+                            
+                    Bukkit.broadcast(chatMessage);
                 });
 
                 sendResponse(exchange, 200, "OK");

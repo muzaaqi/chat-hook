@@ -1,5 +1,5 @@
 # Configuration version (Do not change)
-config-version: 2
+config-version: 3
 
 # Webhook URL to send Minecraft chat to
 webhook-url: "http://localhost:8080/api/minecraft-chat"
@@ -18,13 +18,16 @@ ip-whitelist:
   - "127.0.0.1"
   - "0.0.0.0"
 
-# Message format for chat sent from Minecraft to in-game display
+# Dynamic source labels
+source_tags:
+  web: "WEB"
+  discord: "DISCORD"
+  minecraft: "MC"
+
+# Message format for chat sent to in-game display
 # Available placeholders:
-#   {source}  - Always "MC" for Minecraft messages
+#   {source}  - Source label (e.g. WEB, DISCORD, MC)
 #   {group}   - Player's LuckPerms primary group (uppercase)
 #   {player}  - Player's username or realname
 #   {message} - The chat message content
 message_format: "[{source}] [{group}] - {player} » {message}"
-
-# Source label for Minecraft messages
-source_label: "MC"

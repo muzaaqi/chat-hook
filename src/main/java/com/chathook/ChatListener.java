@@ -33,23 +33,26 @@ public class ChatListener implements Listener {
             message = PlaceholderAPI.setPlaceholders(player, message);
         }
         
+        String realname = PlainTextComponentSerializer.plainText().serialize(player.displayName());
         String group = getPlayerGroup(player);
         
-        webhookSender.sendChat(player.getUniqueId(), player.getName(), group, message);
+        webhookSender.sendChat(player.getUniqueId(), player.getName(), realname, group, message);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+        String realname = PlainTextComponentSerializer.plainText().serialize(event.joinMessage() != null ? player.displayName() : player.name());
         String group = getPlayerGroup(player);
-        webhookSender.sendEvent("join", player.getUniqueId(), player.getName(), group);
+        webhookSender.sendEvent("join", player.getUniqueId(), player.getName(), realname, group);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
+        String realname = PlainTextComponentSerializer.plainText().serialize(player.displayName());
         String group = getPlayerGroup(player);
-        webhookSender.sendEvent("leave", player.getUniqueId(), player.getName(), group);
+        webhookSender.sendEvent("leave", player.getUniqueId(), player.getName(), realname, group);
     }
 
     private String getPlayerGroup(Player player) {

@@ -24,7 +24,7 @@ public class WebhookSender {
                 .build();
     }
 
-    public void sendChat(UUID uuid, String name, String group, String message) {
+    public void sendChat(UUID uuid, String username, String realname, String group, String message) {
         if (!plugin.isSendEnabled()) {
             return;
         }
@@ -40,10 +40,12 @@ public class WebhookSender {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 JsonObject json = new JsonObject();
-                json.addProperty("type", "chat");
                 json.addProperty("uuid", uuid.toString());
-                json.addProperty("name", name);
-                json.addProperty("group", group);
+                json.addProperty("username", username);
+                json.addProperty("realname", realname);
+                json.addProperty("group", group != null ? group.toUpperCase() : "MEMBER");
+                json.addProperty("type", "chat");
+                json.addProperty("source", "minecraft");
                 json.addProperty("message", message);
                 
                 HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
@@ -68,7 +70,7 @@ public class WebhookSender {
         });
     }
 
-    public void sendEvent(String eventType, UUID uuid, String name, String group) {
+    public void sendEvent(String eventType, UUID uuid, String username, String realname, String group) {
         if (!plugin.isSendEnabled()) {
             return;
         }
@@ -84,10 +86,13 @@ public class WebhookSender {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 JsonObject json = new JsonObject();
-                json.addProperty("type", eventType);
                 json.addProperty("uuid", uuid.toString());
-                json.addProperty("name", name);
-                json.addProperty("group", group);
+                json.addProperty("username", username);
+                json.addProperty("realname", realname);
+                json.addProperty("group", group != null ? group.toUpperCase() : "MEMBER");
+                json.addProperty("type", eventType);
+                json.addProperty("source", "minecraft");
+                json.addProperty("message", "");
                 
                 HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                         .uri(URI.create(url))
