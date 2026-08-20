@@ -17,3 +17,14 @@ enable-ip-whitelist: false
 ip-whitelist:
   - "127.0.0.1"
   - "0.0.0.0"
+
+# Message format for chat sent from Minecraft to in-game display
+# Available placeholders:
+#   {source}  - Always "MC" for Minecraft messages
+#   {group}   - Player's LuckPerms primary group (uppercase)
+#   {player}  - Player's username or realname
+#   {message} - The chat message content
+message_format: "[{source}] [{group}] - {player} » {message}"
+
+# Source label for Minecraft messages
+source_label: "MC"

@@ -101,7 +101,8 @@ public class WebServer {
                 String displayName = json.has("realname") ? json.get("realname").getAsString() : username;
 
                 boolean isDiscord = (json.has("source") && "discord".equalsIgnoreCase(json.get("source").getAsString()))
-                        || username.startsWith("[Discord]");
+                        || username.startsWith("[Discord]")
+                        || message.startsWith("[DISCORD]");
 
                 // Check if the user is registered in AuthMe (only if not Discord and AuthMe is installed)
                 if (!isDiscord && Bukkit.getPluginManager().getPlugin("AuthMe") != null) {
@@ -113,16 +114,20 @@ public class WebServer {
 
                 // Broadcast message to Minecraft chat
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    Component prefix = isDiscord
-                            ? Component.text("[Discord] ", NamedTextColor.BLUE)
-                            : Component.text("[WEB] ", NamedTextColor.AQUA);
+                    if (isDiscord && message.startsWith("[DISCORD]")) {
+                        Bukkit.broadcast(Component.text(message, NamedTextColor.WHITE));
+                    } else {
+                        Component prefix = isDiscord
+                                ? Component.text("[DISCORD] ", NamedTextColor.BLUE)
+                                : Component.text("[WEB] ", NamedTextColor.AQUA);
 
-                    Component chatMessage = prefix
-                            .append(Component.text(displayName, NamedTextColor.WHITE))
-                            .append(Component.text(" » ", NamedTextColor.LIGHT_PURPLE))
-                            .append(Component.text(message, NamedTextColor.GRAY));
-                            
-                    Bukkit.broadcast(chatMessage);
+                        Component chatMessage = prefix
+                                .append(Component.text(displayName, NamedTextColor.WHITE))
+                                .append(Component.text(" » ", NamedTextColor.LIGHT_PURPLE))
+                                .append(Component.text(message, NamedTextColor.GRAY));
+                                
+                        Bukkit.broadcast(chatMessage);
+                    }
                 });
 
                 sendResponse(exchange, 200, "OK");
