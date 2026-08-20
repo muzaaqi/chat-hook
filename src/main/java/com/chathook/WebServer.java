@@ -5,7 +5,6 @@ import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import fr.xephi.authme.api.v3.AuthMeApi;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -106,14 +105,6 @@ public class WebServer {
                         : username;
 
                 boolean isDiscord = "discord".equalsIgnoreCase(source);
-
-                // Check if the user is registered in AuthMe (only if from web and AuthMe is installed)
-                if ("web".equalsIgnoreCase(source) && Bukkit.getPluginManager().getPlugin("AuthMe") != null) {
-                    if (!AuthMeApi.getInstance().isRegistered(username)) {
-                        sendResponse(exchange, 403, "User is not registered in AuthMe");
-                        return;
-                    }
-                }
 
                 // Broadcast message to Minecraft chat
                 Bukkit.getScheduler().runTask(plugin, () -> {
