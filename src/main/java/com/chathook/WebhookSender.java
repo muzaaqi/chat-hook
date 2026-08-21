@@ -44,6 +44,7 @@ public class WebhookSender {
                 json.addProperty("username", username);
                 json.addProperty("realname", realname);
                 json.addProperty("group", group != null ? group.toUpperCase() : "MEMBER");
+                json.addProperty("current_group", group != null ? group.toUpperCase() : "MEMBER");
                 json.addProperty("type", "chat");
                 json.addProperty("source", "minecraft");
                 json.addProperty("message", message);
@@ -90,6 +91,7 @@ public class WebhookSender {
                 json.addProperty("username", username);
                 json.addProperty("realname", realname);
                 json.addProperty("group", group != null ? group.toUpperCase() : "MEMBER");
+                json.addProperty("current_group", group != null ? group.toUpperCase() : "MEMBER");
                 json.addProperty("type", eventType);
                 json.addProperty("source", "minecraft");
                 json.addProperty("message", "");

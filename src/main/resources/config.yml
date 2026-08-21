@@ -1,8 +1,8 @@
 # Configuration version (Do not change)
-config-version: 3
+config-version: 4
 
 # Webhook URL to send Minecraft chat to
-webhook-url: "http://localhost:8080/api/minecraft-chat"
+webhook-url: "http://localhost:3001/api/chat/minecraft-webhook"
 
 # Web server settings for receiving chat from website
 web-server:
@@ -24,10 +24,13 @@ source_tags:
   discord: "DISCORD"
   minecraft: "MC"
 
-# Message format for chat sent to in-game display
-# Available placeholders:
-#   {source}  - Source label (e.g. WEB, DISCORD, MC)
-#   {group}   - Player's LuckPerms primary group (uppercase)
-#   {player}  - Player's username or realname
-#   {message} - The chat message content
+# Format for Minecraft → Web/Discord messages
+# Placeholders: {source}, {group}, {player}, {message}
 message_format: "[{source}] [{group}] - {player} » {message}"
+
+# Format for in-game Minecraft chat display (supports color codes & LuckPerms prefix)
+# Placeholders: {prefix}, {group}, {player}, {message}
+ingame_format: "{prefix}{player} » {message}"
+
+# If PlaceholderAPI is installed, use it for in-game prefix/placeholder resolution
+use_placeholderapi: false
