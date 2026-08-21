@@ -40,8 +40,10 @@ public class ChatListener implements Listener {
         String stripped = input.replaceAll("[§&][0-9a-fk-orA-FK-OR]", "");
         // Strip §x§x§x§x§x§x / &x&x&x&x&x&x hex color format
         stripped = stripped.replaceAll("[§&]x([§&][0-9a-fA-F]){6}", "");
-        // Strip MiniMessage tags
+        // Strip MiniMessage tags (<red>, <bold>, etc.)
         stripped = stripped.replaceAll("<[^>]*>", "");
+        // Strip Minecraft custom font / texture bitmap characters (Unicode PUA: \uE000-\uF8FF)
+        stripped = stripped.replaceAll("[\uE000-\uF8FF]", "");
         return stripped.trim();
     }
 
